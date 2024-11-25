@@ -1,0 +1,71 @@
+class Item:
+    def __init__(self, name, symbol, size, value, mandatory=False):
+        self.name = name
+        self.symbol = symbol
+        self.size = size
+        self.value = value
+        self.mandatory = mandatory
+
+
+def knapsack(capacity, items, initial_survival_points, mandatory_items):
+    inventory = [[" " for _ in range(4)] for _ in range(2)]
+    selected_items = []
+    total_points = initial_survival_points
+    remaining_capacity = capacity
+
+    for item in mandatory_items:
+        if item.size <= remaining_capacity:
+            selected_items.append(item)
+            total_points += item.value
+            remaining_capacity -= item.size
+
+    other_items = sorted(
+        [item for item in items if item not in mandatory_items],
+        key=lambda x: x.value / x.size,
+        reverse=True
+    )
+    for item in other_items:
+        if item.size <= remaining_capacity:
+            selected_items.append(item)
+            total_points += item.value
+            remaining_capacity -= item.size
+
+    if total_points <= 0:
+        return None, "Итоговые очки выживания не могут быть положительными."
+
+    current_index = 0
+    for item in selected_items:
+        for _ in range(item.size):
+            inventory[current_index // 4][current_index % 4] = f"[{item.symbol}]"
+            current_index += 1
+
+    return inventory, total_points
+
+
+items = [
+    Item("Винтовка", "r", 3, 25),
+    Item("Пистолет", "p", 2, 15),
+    Item("Боекомплект", "a", 2, 15),
+    Item("Аптечка", "m", 2, 20),
+    Item("Ингалятор", "i", 1, 5, mandatory=True),
+    Item("Нож", "k", 1, 15),
+    Item("Топор", "x", 3, 20),
+    Item("Оберег", "t", 1, 25),
+    Item("Фляжка", "f", 1, 15),
+    Item("Антидот", "d", 1, 10),
+    Item("Еда", "s", 2, 20),
+    Item("Арбалет", "c", 2, 20),
+]
+
+initial_survival_points = 5
+capacity = 8  # 2x4
+mandatory_items = [item for item in items if item.mandatory]
+
+inventory, total_points = knapsack(capacity, items, initial_survival_points, mandatory_items)
+
+if inventory:
+    for row in inventory:
+        print("".join(row))
+    print(f"Итоговые очки выживания: {total_points}")
+else:
+    print(total_points)
